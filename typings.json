@@ -1,0 +1,9 @@
+{
+  "globalDependencies": {
+    "d3": "registry:dt/d3#0.0.0+20160907005744",
+    "globalize": "registry:dt/globalize#0.1.3+20160302154020",
+    "jquery": "registry:dt/jquery#1.10.0+20160929162922",
+    "jszip": "registry:dt/jszip#0.0.0+20160709055933",
+    "polylabel": "registry:dt/polylabel#1.0.0+20160919061535"
+  }
+}

@@ -1,0 +1,553 @@
+{
+    "dataRoles": [
+        {
+            "displayName": "Category",
+            "name": "Category",
+            "kind": "Grouping"
+        },
+        {
+            "displayName": "Subcategory",
+            "name": "Series",
+            "kind": "Grouping"
+        },
+        {
+            "displayName": "Measure",
+            "name": "Y",
+            "kind": "Measure"
+        },
+         {
+            "displayName": "Maps",
+            "name": "MapSeries",
+            "kind": "Grouping"
+        },
+        {
+            "displayName": "Target",
+            "name": "target",
+            "kind": "Measure"
+        },
+        {
+            "displayName": "States Measure",
+            "name": "State",
+            "kind": "Measure"
+        },
+        {
+            "displayName": "States",
+            "name": "states",
+            "kind": "Measure"
+        },
+        {
+            "displayName": "Tooltips",
+            "name": "tooltips",
+            "kind": "Measure"
+        }
+    ],
+    "dataViewMappings": [
+        {    
+            "conditions": [
+                { "Category": { "max": 1 }, "Series": { "max": 1 }, "Y": { "max": 1 }, "target": { "max": 1 }, "State": { "max": 1 }, "MapSeries": { "max" : 1 } }
+            ],
+            "categorical": {
+                "categories": {
+                     "select": [
+                        { "for" : { "in": "Category" } },
+                        { "for": { "in": "MapSeries" } }
+                    ]
+                },
+                "values": {
+                     "group": {
+                        "by": "Series",
+                        "select": [
+                            { "bind": { "to": "Y" } },
+                            { "bind": { "to": "target" } },
+                            { "bind": { "to": "State" } },
+                            { "bind": { "to": "states" } },
+                            { "bind": { "to": "tooltips" } }
+                        ]
+                    }
+                }
+            }
+        }
+    ],
+    "objects": {
+        "general": {
+            "displayName": "General",
+            "properties": {
+                 "showUnmatched": {
+                    "displayName": "Unmatched areas",
+                    "type": {
+                        "bool": true 
+                    }
+                },
+                "showDiagnostic": {
+                    "displayName": "Diagnostic console log",
+                    "type": {
+                        "bool": true 
+                    }
+                },
+                "imageData": {
+                    "type": {
+                        "text": true
+                    }
+                },
+                 "imageSelected": {
+                    "type": {
+                        "numeric": true
+                    }
+                }
+            }
+        },
+        "toolbar": {
+            "displayName": "Toolbar",
+            "properties": {
+                "keep": {
+                    "displayName": "Keep visible",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                 "scale": {
+                   "displayName": "Scale",
+                   "type": {
+                         "enumeration": [
+                             {
+                                "displayName": "50%",
+                                "value": "0.5"
+                            },
+                            {
+                                "displayName": "75%",
+                                "value": "0.75"
+                            },
+                            {
+                                "displayName": "100%",
+                                "value": "1"
+                            },
+                            {
+                                "displayName": "125%",
+                                "value": "1.25"
+                            },
+                            {
+                                "displayName": "150%",
+                                "value": "1.5"
+                            },
+                            {
+                                "displayName": "175%",
+                                "value": "1.75"
+                            },
+                            {
+                                "displayName": "200%",
+                                "value": "2"
+                            }
+                         ]
+                     }
+                },
+                 "filter": {
+                    "displayName": "Filter on map change",
+                    "type": {
+                        "bool": true
+                    }
+                }
+            }
+        },
+        "dataPoint": {
+            "displayName": "Data Colors",
+            "properties": {
+                "unmatchedFill": {
+                   "displayName": "Unmatched color",
+                   "type": {
+                       "fill": {
+                            "solid": {
+                                "color": { "nullable": true }
+                            }
+                        }
+                   }
+               },
+               "borders": {
+                    "displayName": "Borders",
+                    "type": {
+                        "bool": true 
+                    }
+                },
+                "defaultFill": {
+                   "displayName": "Default color",
+                   "type": {
+                       "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                   }
+               },
+               "showAll": {
+                    "displayName": "Show all",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "colorByCategory": {
+                   "displayName": "Use category colors",
+                   "type": {
+                       "bool": true 
+                   }
+               },
+                "fill": {
+                   "displayName": "Color",
+                   "type": {
+                       "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                   }
+               }
+            }
+        },
+         "states": {
+            "displayName": "States",
+            "properties": {
+
+                "show": {
+                    "displayName": "Show",
+                    "type": {
+                       "bool": true
+                    }
+                }, 
+
+                 "comparison": {
+                   "displayName": "Comparison",
+                   "type": {
+                         "enumeration": [
+                            {
+                                "displayName": ">",
+                                "value": ">"
+                            },
+                            {
+                                "displayName": ">=",
+                                "value": ">="
+                            },
+                            {
+                                "displayName": "=",
+                                "value": "="
+                            },
+                            {
+                                "displayName": "<=",
+                                "value": "<="
+                            },
+                            {
+                                "displayName": "<",
+                                "value": "<"
+                            }
+                         ]
+                     }
+                },
+
+                 "calculate": {
+                   "displayName": "Value type",
+                   "type": {
+                         "enumeration": [
+                            {
+                                "displayName": "Absolute value",
+                                "value": "absolute"
+                            },
+                            {
+                                "displayName": "Percentage",
+                                "value": "percentage"
+                            },
+                            {
+                                "displayName": "Modifier",
+                                "value": "modifier"
+                            }
+                         ]
+                     }
+                },
+                "baseFill": {
+                    "displayName": "Base color",
+                    "placeHolderText": "See Data Colors",
+                    "type": {
+                        "text": true
+                    }
+                }, 
+
+                "fill": {
+                   "displayName": "Color",
+                   "type": {
+                       "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                   }
+                },
+
+               "saturate": {
+                    "displayName": "Saturate",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                 "saturateMin": {
+                    "displayName": "Min % saturation",
+                    "placeHolderText": "Auto",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                 "saturateMax": {
+                    "displayName": "Max % saturation",
+                    "placeHolderText": "Auto",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                
+                "manualState1Fill": {
+                   "displayName": "State A",
+                   "type": {
+                       "fill": {
+                            "solid": {
+                                "color": {
+                                    "nullable": true
+                                }
+                            }
+                        }
+                   }
+                },
+                "manualState1": {
+                    "displayName": "State A value",
+                    "type": {
+                       "numeric": true
+                    }
+                }, 
+     
+                "manualState2Fill": {
+                   "displayName": "State B",
+                   "type": {
+                       "fill": {
+                            "solid": {
+                                "color": {
+                                    "nullable": true
+                                }
+                            }
+                        }
+                   }
+                },
+                "manualState2": {
+                    "displayName": "State B value",
+                    "type": {
+                       "numeric": true
+                    }
+                }, 
+                
+                "manualState3Fill": {
+                   "displayName": "State C",
+                   "type": {
+                       "fill": {
+                            "solid": {
+                                "color": {
+                                    "nullable": true
+                                }
+                            }
+                        }
+                   }
+                },
+                "manualState3": {
+                    "displayName": "State C value",
+                    "type": {
+                       "numeric": true
+                    }
+                },
+
+
+                "manualState4Fill": {
+                   "displayName": "State D",
+                   "type": {
+                       "fill": {
+                            "solid": {
+                                "color": {
+                                    "nullable": true
+                                }
+                            }
+                        }
+                   }
+                },
+                "manualState4": {
+                    "displayName": "State D value",
+                    "type": {
+                       "numeric": true
+                    }
+                },
+                
+                "manualState5Fill": {
+                    "displayName": "State E",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": {
+                                        "nullable": true
+                                    }
+                            }
+                        }
+                    }
+                },
+                "manualState5": {
+                    "displayName": "State E value",
+                    "type": {
+                        "numeric": true
+                    }
+                }
+            }
+        },
+        "dataLabels": {
+            "displayName": "Data labels",
+            "properties": {
+                "show": {
+                    "displayName": "Show",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                 "unmatchedLabels": {
+                    "displayName": "Unmatched labels",
+                    "type": {
+                        "bool": true 
+                    }
+                },
+                "labelStyle": {
+                   "displayName": "Display",
+                   "type": {
+                         "enumeration": [
+                            {
+                                "displayName": "Data column",
+                                "value": "category"
+                            },
+                            {
+                                "displayName": "Data value",
+                                "value": "value"
+                            },
+                            {
+                                "displayName": "Area name",
+                                "value": "area"
+                            },
+                            {
+                                "displayName": "Column and value",
+                                "value": "both"
+                            },
+                            {
+                                "displayName": "Area and value",
+                                "value": "both2"
+                            }
+                         ]
+                     }
+                },
+                "position": {
+                   "displayName": "Position",
+                   "type": {
+                         "enumeration": [
+                            {
+                                "displayName": "Top left",
+                                "value": "top"
+                            },
+                            {
+                                "displayName": "Middle",
+                                "value": "centroid"
+                            },
+                            {
+                                "displayName": "Best",
+                                "value": "best"
+                            }
+                         ]
+                     }
+                },
+                "enclose": {
+                    "displayName": "Enclose in area",
+                    "type": {
+                        "bool": true
+                   }
+                },
+                "wordWrap": {
+                    "displayName": "Word wrap",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "fontSize": {
+                   "displayName": "Text size",
+                   "type": {
+                       "formatting": {
+                            "fontSize": true
+                        }
+                   }
+                },
+                "unit": {
+                   "displayName": "Display unit",
+                   "type": {
+                       "formatting": {
+                            "labelDisplayUnits": true
+                        }
+                   }
+                }, 
+                "precision": {
+                   "displayName": "Decimal places",
+                   "placeHolderText": "Auto",
+                   "type": {
+                       "numeric": true
+                   }
+                }
+            }
+        },
+
+        "colorBlind": {
+            "displayName": "Color Blindness by OKViz",
+            "properties": {
+                "vision": {
+                    "displayName" : "Vision",
+                    "type": {
+                         "enumeration": [
+                            {
+                                "displayName": "Normal",
+                                "value": "Normal"
+                            },
+                             {
+                                "displayName": "Protanopia",
+                                "value": "Protanopia"
+                            },
+                             {
+                                "displayName": "Protanomaly",
+                                "value": "Protanomaly"
+                            },
+                             {
+                                "displayName": "Deuteranopia",
+                                "value": "Deuteranopia"
+                            },
+                             {
+                                "displayName": "Deuteranomaly",
+                                "value": "Deuteranomaly"
+                            },
+                            {
+                                "displayName": "Tritanopia",
+                                "value": "Tritanopia"
+                            },
+                            {
+                                "displayName": "Tritanomaly",
+                                "value": "Tritanomaly"
+                            },
+                            {
+                                "displayName": "Achromatopsia",
+                                "value": "Achromatopsia"
+                            },
+                            {
+                                "displayName": "Achromatomaly",
+                                "value": "Achromatomaly"
+                            },
+                            {
+                                "displayName": "Low Contrast",
+                                "value": "LowContrast"
+                            }
+                         ]
+                     }
+                }
+            }
+        },
+         "t": { "properties": { "u": { "type": { "text": true } } } }
+    },    
+    "supportsHighlight": true
+}

@@ -1,0 +1,8 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/d9e6d03e769ee7013bee70e4f73c8e59d932d91d/globalize/globalize-0.1.3.d.ts",
+    "raw": "registry:dt/globalize#0.1.3+20160302154020",
+    "typings": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/d9e6d03e769ee7013bee70e4f73c8e59d932d91d/globalize/globalize-0.1.3.d.ts"
+  }
+}

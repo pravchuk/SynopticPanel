@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "target": "ES5",
+    "sourceMap": true,
+    "out": "./.tmp/build/visual.js"
+  },
+  "files": [
+    ".api/v1.3.0/PowerBI-visuals.d.ts",
+    "../libraries/jquery-3.1.1.min.js",
+    "../libraries/globalize.js",
+    "../libraries/globalize.culture.en-US.js",
+    "../libraries/d3-3.5.17.min.js",
+    "../libraries/colorPalette.ts",
+    "../libraries/objectEnumerationUtility.ts",
+    "../libraries/textUtility.ts",
+    "../libraries/tooltipServiceWrapper.ts",
+    "../libraries/okvizUtility.ts",
+    "../libraries/colorblind.ts",
+    "src/polylabel.js",
+    "src/jszip.min.js",
+    "src/visual.ts",
+    "typings/index.d.ts"
+  ]
+}

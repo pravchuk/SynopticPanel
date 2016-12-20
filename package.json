@@ -1,0 +1,6 @@
+{
+  "name": "visual",
+  "dependencies": {
+    "@types/polylabel": "^1.0.3"
+  }
+}
