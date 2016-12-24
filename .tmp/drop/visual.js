@@ -6828,7 +6828,7 @@ else {
 });
 /*
  *  Synoptic Panel by OKViz
- *  v1.4.0
+ *  v1.4.1
  *
  *  Copyright (c) SQLBI. OKViz is a trademark of SQLBI Corp.
  *  All rights reserved.
@@ -6870,7 +6870,8 @@ var powerbi;
                         toolbar: {
                             keep: false,
                             scale: "1",
-                            filter: false
+                            filter: false,
+                            zoom: true
                         },
                         dataPoint: {
                             borders: true,
@@ -6920,7 +6921,8 @@ var powerbi;
                             toolbar: {
                                 keep: PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A.getValue(objects, "toolbar", "keep", settings.toolbar.keep),
                                 scale: PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A.getValue(objects, "toolbar", "scale", settings.toolbar.scale),
-                                filter: PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A.getValue(objects, "toolbar", "filter", settings.toolbar.filter)
+                                filter: PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A.getValue(objects, "toolbar", "filter", settings.toolbar.filter),
+                                zoom: PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A.getValue(objects, "toolbar", "zoom", settings.toolbar.zoom)
                             },
                             dataPoint: {
                                 unmatchedFill: PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A.getValue(objects, "dataPoint", "unmatchedFill", settings.dataPoint.unmatchedFill),
@@ -7413,6 +7415,9 @@ var powerbi;
                         PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A.OKVizUtility.objectsAreEqual(previousModel.states, states) &&
                         previousModel.settings.general.showUnmatched == settings.general.showUnmatched))
                         postUpdateActions.resetLabels = false;
+                    //Check if to reset toolbar
+                    if (previousModel && previousModel.settings && previousModel.settings.toolbar && previousModel.settings.toolbar.zoom != settings.toolbar.zoom)
+                        postUpdateActions.resetToolbar = true;
                     return {
                         dataPoints: dataPoints,
                         matchIndex: matchIndex,
@@ -7463,7 +7468,7 @@ var powerbi;
                         if (this.model.dataPoints.length == 0)
                             return;
                         var redrawToolbar = false;
-                        if (this.editMode != (options.viewMode == 1 /* Edit */))
+                        if (this.editMode != (options.viewMode == 1 /* Edit */) || this.model.postUpdateActions.resetToolbar)
                             redrawToolbar = true;
                         this.editMode = (options.viewMode == 1 /* Edit */);
                         this.toolbar(redrawToolbar);
@@ -7520,7 +7525,7 @@ var powerbi;
                                 .classed('body', true)
                                 .html('Design your maps with <strong>https://synoptic.design</strong>');
                         }
-                        PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A.OKVizUtility.t(['SynopticPanel', '1.4.0'], this.element, options, this.host, {
+                        PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A.OKVizUtility.t(['SynopticPanel', '1.4.1'], this.element, options, this.host, {
                             'cd1': this.model.settings.colorBlind.vision,
                             'cd2': (this.model.settings.states.show ? this.model.states.length : 0),
                             'cd3': this.model.settings.states.comparison,
@@ -7533,6 +7538,10 @@ var powerbi;
                         });
                         //Color Blind module
                         PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A.OKVizUtility.applyColorBlindVision(this.model.settings.colorBlind.vision, this.element);
+                    };
+                    //Not exposed yet by Power BI
+                    Visual.prototype.onViewModeChanged = function (viewMode) {
+                        this.toolbar(true);
                     };
                     Visual.prototype.destroy = function () {
                     };
@@ -7676,33 +7685,39 @@ var powerbi;
                                         .scaleExtent([1, 10])
                                         .center([this.containerSize.width / 2, this.containerSize.height / 2])
                                         .on("zoom", function () {
-                                        if (self.zoomingTimeout < 0)
-                                            self.zoomingTimeout = setTimeout(function () {
-                                                self.zooming = true;
-                                            }, 250);
-                                        self.gContext.attr("transform", "translate(" + d3.event.translate + ") scale(" + d3.event.scale + ")");
+                                        if (self.model.settings.toolbar.zoom) {
+                                            if (self.zoomingTimeout < 0)
+                                                self.zoomingTimeout = setTimeout(function () {
+                                                    self.zooming = true;
+                                                }, 250);
+                                            self.gContext.attr("transform", "translate(" + d3.event.translate + ") scale(" + d3.event.scale + ")");
+                                        }
                                     })
                                         .on("zoomend", function () {
-                                        var zoomScale = zoom_1.scale();
-                                        var zoomTranslation = zoom_1.translate();
-                                        if (map.scale.scale !== zoomScale || map.scale.translation[0] !== zoomTranslation[0] || map.scale.translation[1] !== zoomTranslation[1]) {
-                                            map.scale = { scale: zoomScale, translation: zoomTranslation };
-                                            self.persistMaps();
+                                        if (self.model.settings.toolbar.zoom) {
+                                            var zoomScale = zoom_1.scale();
+                                            var zoomTranslation = zoom_1.translate();
+                                            if (map.scale.scale !== zoomScale || map.scale.translation[0] !== zoomTranslation[0] || map.scale.translation[1] !== zoomTranslation[1]) {
+                                                map.scale = { scale: zoomScale, translation: zoomTranslation };
+                                                self.persistMaps();
+                                            }
+                                            //This avoid drag and click
+                                            clearTimeout(self.zoomingTimeout);
+                                            self.zoomingTimeout = -1;
+                                            setTimeout(function () {
+                                                self.zooming = false;
+                                            }, 1);
                                         }
-                                        //This avoid drag and click
-                                        clearTimeout(self.zoomingTimeout);
-                                        self.zoomingTimeout = -1;
-                                        setTimeout(function () {
-                                            self.zooming = false;
-                                        }, 1);
                                     });
                                     this.svg.call(zoom_1);
                                     this.zoom = zoom_1;
                                 }
                                 if (this.model.postUpdateActions.resetCanvas) {
-                                    this.zoom.scale(map.scale.scale);
-                                    this.zoom.translate(map.scale.translation);
-                                    this.zoom.event(this.svg);
+                                    if (this.model.settings.toolbar.zoom && this.zoom) {
+                                        this.zoom.scale(map.scale.scale);
+                                        this.zoom.translate(map.scale.translation);
+                                        this.zoom.event(this.svg);
+                                    }
                                 }
                                 this.renderSVG(map);
                             }
@@ -8040,7 +8055,7 @@ var powerbi;
                             if (this.gallery.visible) {
                                 buttons.push(galleryBox);
                             }
-                            if (this.model.maps.length > 0 && !this.gallery.visible) {
+                            if (this.model.maps.length > 0 && !this.gallery.visible && this.model.settings.toolbar.zoom) {
                                 if (buttons.length > 0)
                                     buttons.push(sepButton);
                                 buttons.push(zoomInButton, zoomOutButton, resetZoomButton);
@@ -8224,6 +8239,7 @@ var powerbi;
                                             self.gallery.folders.push(folder.name);
                                         }
                                         self.toolbar(true);
+                                        //TODO https://synoptic.design/wp-json/wp/v2/posts/?per_page=100
                                         $.getJSON('https://synoptic.design/api/get_posts/?count=-1', function (d) {
                                             if (self.gallery.retreiving) {
                                                 if (d.status === 'ok') {
@@ -8368,7 +8384,8 @@ var powerbi;
                                     objectName: objectName,
                                     properties: {
                                         "keep": this.model.settings.toolbar.keep,
-                                        "scale": this.model.settings.toolbar.scale
+                                        "scale": this.model.settings.toolbar.scale,
+                                        "zoom": this.model.settings.toolbar.zoom
                                     },
                                     selector: null
                                 });
@@ -8565,11 +8582,11 @@ var powerbi;
     (function (visuals) {
         var plugins;
         (function (plugins) {
-            plugins.PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A_DEBUG = {
-                name: 'PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A_DEBUG',
+            plugins.PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A = {
+                name: 'PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A',
                 displayName: 'Synoptic Panel by OKViz',
                 class: 'Visual',
-                version: '1.4.0',
+                version: '1.4.1',
                 apiVersion: '1.3.0',
                 create: function (options) { return new powerbi.extensibility.visual.PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A.Visual(options); },
                 custom: true

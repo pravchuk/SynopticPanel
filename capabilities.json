@@ -145,6 +145,12 @@
                     "type": {
                         "bool": true
                     }
+                },
+                "zoom": {
+                    "displayName": "Zoom",
+                    "type": {
+                        "bool": true
+                    }
                 }
             }
         },

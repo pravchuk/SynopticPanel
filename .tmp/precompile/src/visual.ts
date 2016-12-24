@@ -1,6 +1,6 @@
 /*
  *  Synoptic Panel by OKViz
- *  v1.4.0
+ *  v1.4.1
  *
  *  Copyright (c) SQLBI. OKViz is a trademark of SQLBI Corp.
  *  All rights reserved.
@@ -47,6 +47,7 @@ module powerbi.extensibility.visual.PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A 
         resetCanvas?: boolean;
         resetLabels?: boolean;
         resetSelectionManager?: boolean;
+        resetToolbar?: boolean;
     }
     
     interface VisualDataPoint {
@@ -138,6 +139,7 @@ module powerbi.extensibility.visual.PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A 
             keep: boolean;
             scale: string;
             filter: boolean;
+            zoom: boolean;
         },
         dataPoint: {
             unmatchedFill?: Fill;
@@ -193,7 +195,8 @@ module powerbi.extensibility.visual.PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A 
             toolbar: {
                 keep: false,
                 scale: "1",
-                filter: false
+                filter: false,
+                zoom: true
             },
             dataPoint: {
                 borders: true,
@@ -246,7 +249,8 @@ module powerbi.extensibility.visual.PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A 
                 toolbar: {
                     keep: getValue<boolean>(objects, "toolbar", "keep", settings.toolbar.keep),
                     scale: getValue<string>(objects, "toolbar", "scale", settings.toolbar.scale),
-                    filter: getValue<boolean>(objects, "toolbar", "filter", settings.toolbar.filter)
+                    filter: getValue<boolean>(objects, "toolbar", "filter", settings.toolbar.filter),
+                    zoom: getValue<boolean>(objects, "toolbar", "zoom", settings.toolbar.zoom)
                 },
                 dataPoint: {
                     unmatchedFill: getValue<Fill>(objects, "dataPoint", "unmatchedFill", settings.dataPoint.unmatchedFill),
@@ -857,6 +861,11 @@ module powerbi.extensibility.visual.PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A 
         ))
             postUpdateActions.resetLabels = false;
 
+
+        //Check if to reset toolbar
+        if (previousModel && previousModel.settings && previousModel.settings.toolbar && previousModel.settings.toolbar.zoom != settings.toolbar.zoom)
+            postUpdateActions.resetToolbar = true;
+
         return {
             dataPoints: dataPoints,
             matchIndex: matchIndex,
@@ -916,7 +925,7 @@ module powerbi.extensibility.visual.PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A 
  
             let selectionManager  = this.selectionManager;
             this.viewPort = options.viewport;
-    
+
             let dataChanged = (options.type == VisualUpdateType.Data || options.type == VisualUpdateType.All || d3.select('.chart').empty());
             if (dataChanged) {
     
@@ -939,7 +948,7 @@ module powerbi.extensibility.visual.PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A 
  
 
             let redrawToolbar = false;
-            if (this.editMode != (options.viewMode == ViewMode.Edit)) redrawToolbar = true;
+            if (this.editMode != (options.viewMode == ViewMode.Edit) || this.model.postUpdateActions.resetToolbar) redrawToolbar = true;
             this.editMode = (options.viewMode == ViewMode.Edit);
             this.toolbar(redrawToolbar);
  
@@ -1007,7 +1016,7 @@ module powerbi.extensibility.visual.PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A 
                     .html('Design your maps with <strong>https://synoptic.design</strong>');
             }
     
-            OKVizUtility.t(['SynopticPanel', '1.4.0'], this.element, options, this.host, {
+            OKVizUtility.t(['SynopticPanel', '1.4.1'], this.element, options, this.host, {
                 'cd1': this.model.settings.colorBlind.vision, 
                 'cd2': (this.model.settings.states.show ?  this.model.states.length : 0), 
                 'cd3': this.model.settings.states.comparison, 
@@ -1021,6 +1030,11 @@ module powerbi.extensibility.visual.PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A 
 
            //Color Blind module
             OKVizUtility.applyColorBlindVision(this.model.settings.colorBlind.vision, this.element);
+        }
+
+        //Not exposed yet by Power BI
+        public onViewModeChanged(viewMode: ViewMode): void {
+            this.toolbar(true);
         }
 
         public destroy(): void {
@@ -1197,33 +1211,38 @@ module powerbi.extensibility.visual.PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A 
                             'width': '100%',
                             'height': '100%'
                         });
-
+                     
                         var self = this;
                         let zoom = d3.behavior.zoom() 
                             .scaleExtent([1, 10])
                             .center([this.containerSize.width / 2, this.containerSize.height / 2])
                             .on("zoom", function(){
-                                if (self.zoomingTimeout < 0)
-                                    self.zoomingTimeout = setTimeout(function(){
-                                        self.zooming = true;
-                                    }, 250);
-                                self.gContext.attr("transform", "translate(" + (<any>d3.event).translate + ") scale(" + (<any>d3.event).scale + ")");
+
+                                if (self.model.settings.toolbar.zoom) {
+                                    if (self.zoomingTimeout < 0)
+                                        self.zoomingTimeout = setTimeout(function(){
+                                            self.zooming = true;
+                                        }, 250);
+                                    self.gContext.attr("transform", "translate(" + (<any>d3.event).translate + ") scale(" + (<any>d3.event).scale + ")");
+                                }
                             })
                             .on("zoomend", function(){  
 
-                                let zoomScale = zoom.scale();
-                                let zoomTranslation = zoom.translate();
-                                if (map.scale.scale !== zoomScale || map.scale.translation[0] !== zoomTranslation[0] || map.scale.translation[1] !== zoomTranslation[1]) { 
-                                    map.scale = { scale: zoomScale, translation: zoomTranslation };
-                                    self.persistMaps();
-                                }
+                                if (self.model.settings.toolbar.zoom) {
+                                    let zoomScale = zoom.scale();
+                                    let zoomTranslation = zoom.translate();
+                                    if (map.scale.scale !== zoomScale || map.scale.translation[0] !== zoomTranslation[0] || map.scale.translation[1] !== zoomTranslation[1]) { 
+                                        map.scale = { scale: zoomScale, translation: zoomTranslation };
+                                        self.persistMaps();
+                                    }
 
-                                //This avoid drag and click
-                                clearTimeout(self.zoomingTimeout);
-                                self.zoomingTimeout = -1;
-                                setTimeout(function(){
-                                    self.zooming = false;
-                                }, 1);
+                                    //This avoid drag and click
+                                    clearTimeout(self.zoomingTimeout);
+                                    self.zoomingTimeout = -1;
+                                    setTimeout(function(){
+                                        self.zooming = false;
+                                    }, 1);
+                                }
                             });
 
                         this.svg.call(zoom);
@@ -1231,10 +1250,11 @@ module powerbi.extensibility.visual.PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A 
                     }
 
                     if (this.model.postUpdateActions.resetCanvas) { 
-
-                        this.zoom.scale(map.scale.scale);
-                        this.zoom.translate(map.scale.translation);
-                        this.zoom.event(this.svg);
+                        if (this.model.settings.toolbar.zoom && this.zoom) {
+                            this.zoom.scale(map.scale.scale);
+                            this.zoom.translate(map.scale.translation);
+                            this.zoom.event(this.svg);
+                        }
                     }
 
                    
@@ -1662,7 +1682,7 @@ module powerbi.extensibility.visual.PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A 
                     buttons.push(galleryBox);
                 }
 
-                if (this.model.maps.length > 0 && !this.gallery.visible) {
+                if (this.model.maps.length > 0 && !this.gallery.visible && this.model.settings.toolbar.zoom) {
                     if (buttons.length > 0)
                         buttons.push(sepButton);
                     buttons.push(zoomInButton, zoomOutButton, resetZoomButton);
@@ -1885,6 +1905,8 @@ module powerbi.extensibility.visual.PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A 
                                 self.gallery.folders.push(folder.name)
                             }
                             self.toolbar(true);
+                            
+//TODO https://synoptic.design/wp-json/wp/v2/posts/?per_page=100
 
                             $.getJSON('https://synoptic.design/api/get_posts/?count=-1', function (d) {
                                 if (self.gallery.retreiving) {
@@ -2062,7 +2084,8 @@ module powerbi.extensibility.visual.PBI_CV_815282F9_27F5_4950_9430_E910E0A8DB6A 
                         objectName: objectName,
                         properties: {
                             "keep": this.model.settings.toolbar.keep,
-                            "scale": this.model.settings.toolbar.scale
+                            "scale": this.model.settings.toolbar.scale,
+                            "zoom": this.model.settings.toolbar.zoom
                         },
                         selector: null
                     });
